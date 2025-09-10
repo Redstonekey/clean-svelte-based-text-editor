@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --editor-bg: #ffffff;
+  --heading-color: #b83280;
+  --list-color: #6b7280;
+  --bold-color: #111827;
+  --text-color: #111827;
+  --bg-color: #ffffff;
+  --caret-color: #111827;
+  --topbar-bg: rgba(255,255,255,0.85);
+  --topbar-ink: #111827;
+  --muted-overlay: rgba(0,0,0,0.06);
+  --icon-hover-bg: rgba(0,0,0,0.05);
+  --border-muted: rgba(0,0,0,0.05);
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(0,0,0,0.12);
+  --scrollbar-thumb-hover: rgba(0,0,0,0.18);
+  --selection-bg: rgba(100,150,250,0.25);
+}
+
+[data-theme='dark'] {
+  --editor-bg: #0b1220;
+  color: #e6eef8;
+  --text-color: #e6eef8;
+  --bg-color: #071020;
+  --caret-color: #e6eef8;
+  --topbar-bg: rgba(8,12,20,0.6);
+  --topbar-ink: #e6eef8;
+  --muted-overlay: rgba(255,255,255,0.06);
+  --icon-hover-bg: rgba(255,255,255,0.04);
+  --border-muted: rgba(255,255,255,0.06);
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(255,255,255,0.12);
+  --scrollbar-thumb-hover: rgba(255,255,255,0.18);
+  --selection-bg: rgba(100,150,250,0.35);
+}
+
+#app { height: 100vh; background: var(--bg-color); color: var(--text-color); }
+
+body { background: var(--bg-color); color: var(--text-color); }
+
+.topbar { background: var(--topbar-bg); color: var(--topbar-ink); }
+
+.icon-btn { background: transparent; border: none; padding:8px; border-radius:6px; color:var(--topbar-ink); }
+.icon-btn:hover { background: var(--icon-hover-bg); }
+
+/* editor-wrap handled in component styles */
+
+/* Scrollbar styling (Chromium + Firefox). Tweak via CSS variables above. */
+/* Use the `.hide-scrollbar` utility on a container (e.g. .cm-scroller or .editor-wrap) to hide the scrollbar entirely. */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover); }
+
+/* CodeMirror specific scroller (ensure editor scrollbars get themed) */
+.cm-scroller::-webkit-scrollbar { width: 10px; }
+.cm-scroller::-webkit-scrollbar-thumb { background-color: var(--scrollbar-thumb); }
+.cm-scroller::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover); }
+
+/* Firefox */
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track); }
+
+/* Utility: hide scrollbar if you prefer no visible thumb (adds overflow still) */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+/* aggressively hide UA focus outlines in editor area to avoid dotted rectangle */
+.editor-wrap :focus, .editor-wrap *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* modal/theme styles so dialogs follow the active theme variables */
+.modal { background: var(--topbar-bg); color: var(--topbar-ink); }
+.modal input[type="text"], .modal input[type="search"], .modal input, .modal textarea {
+  background: var(--editor-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-muted);
+  padding: 8px 10px;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.modal button { background: transparent; color: var(--topbar-ink); border: 1px solid var(--border-muted); padding: 8px 10px; border-radius: 6px; }
+.modal button:hover { background: var(--icon-hover-bg); }
