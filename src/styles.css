@@ -19,6 +19,7 @@
   --scrollbar-thumb: rgba(0,0,0,0.12);
   --scrollbar-thumb-hover: rgba(0,0,0,0.18);
   --selection-bg: rgba(100,150,250,0.25);
+  --selection-text: inherit;
 }
 
 [data-theme='dark'] {
@@ -36,6 +37,7 @@
   --scrollbar-thumb: rgba(255,255,255,0.12);
   --scrollbar-thumb-hover: rgba(255,255,255,0.18);
   --selection-bg: rgba(100,150,250,0.35);
+  --selection-text: var(--text-color);
 }
 
 #app { height: 100vh; background: var(--bg-color); color: var(--text-color); }
@@ -115,3 +117,8 @@ input, textarea, select, button { min-width: 0; }
 
 /* Ensure editor container doesn't force children wider than available space */
 .cm-scroller, .cm-editor { min-width: 0; }
+
+/* Selection styling for normal DOM and CodeMirror content.
+  Uses theme-aware variables so dark mode selection remains subtle and readable. */
+::selection { background: var(--selection-bg); color: var(--selection-text); }
+.cm-selectionBackground, .cm-focused .cm-selectionBackground { background: var(--selection-bg) !important; color: var(--selection-text) !important; }

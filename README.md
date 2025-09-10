@@ -1,5 +1,4 @@
-IA Editor (Free) - dev scaffold
-
+# Clean Svelte based Text Editor with simple markup
 This is a minimal Svelte + Vite scaffold for the IA Editor UI prototype.
 
 Quick start (PowerShell):
