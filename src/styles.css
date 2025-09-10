@@ -92,3 +92,26 @@ body { background: var(--bg-color); color: var(--text-color); }
 }
 .modal button { background: transparent; color: var(--topbar-ink); border: 1px solid var(--border-muted); padding: 8px 10px; border-radius: 6px; }
 .modal button:hover { background: var(--icon-hover-bg); }
+
+/* Prevent long unbroken text from overflowing containers.
+   Ensure inputs/textarea in modals and the editor content wrap long words. */
+input, textarea, select, button { min-width: 0; }
+
+/* Modal inputs should wrap long words and respect container width */
+.modal input[type="text"], .modal input[type="search"], .modal input, .modal textarea {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* CodeMirror: allow long words/URLs to wrap instead of creating horizontal overflow */
+.cm-content, .cm-line {
+  /* pre-wrap keeps existing whitespace and wraps long lines */
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Ensure editor container doesn't force children wider than available space */
+.cm-scroller, .cm-editor { min-width: 0; }
