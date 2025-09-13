@@ -1,5 +1,5 @@
 <script lang="ts">
-import { onMount } from 'svelte';
+import { onMount, onDestroy } from 'svelte';
 import MarkdownEditor from './components/MarkdownEditor.svelte';
 import Settings from './components/Settings.svelte';
 
@@ -190,6 +190,43 @@ let editorSpellcheck = localStorage.getItem('ia:spellcheck') === 'true';
 let editorFontSize = parseInt(localStorage.getItem('ia:fontSize') || '20', 10);
 let editingTitle = false;
 let editTitle = '';
+let focusMode = false;
+
+function onEditorMouseEnter() {
+  // when entering editor area, ensure focus mode shows focused editor
+  // (if focusMode is toggled on, keep it; otherwise nothing)
+}
+
+function onEditorMouseLeave() {
+  // no-op: don't auto-exit focus mode on mouse leave; only exit via top hover or leaving fullscreen
+}
+
+async function enableFocusMode() {
+  try {
+    focusMode = true;
+    // try to enter browser fullscreen (must be called from user gesture when possible)
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+    }
+  } catch (err) {
+    // ignore failures (browser may block fullscreen if not a user gesture)
+  }
+}
+
+async function disableFocusMode() {
+  try {
+    focusMode = false;
+    if (document.fullscreenElement && document.exitFullscreen) {
+      await document.exitFullscreen();
+    }
+  } catch (err) {
+    // ignore
+  }
+}
+
+function toggleFocusMode() {
+  if (focusMode) disableFocusMode(); else enableFocusMode();
+}
 
 $: editorKey = `${editorFont}|${editorFontSize}|${String(editorSpellcheck)}`;
 
@@ -243,8 +280,46 @@ onMount(() => {
       newNote();
     }
     if (e.key === 'Escape') {
-      showBar = true;
+      // If in fullscreen, let Escape exit fullscreen (which will sync focus mode off);
+      // otherwise reveal taskbar without toggling focus mode.
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen();
+      } else {
+        showBar = true;
+      }
     }
+    if (e.key === 'F11') {
+      // intercept F11 to toggle in-app focus mode and try to fullscreen the page
+      e.preventDefault();
+      toggleFocusMode();
+    }
+  });
+
+  // when focusMode is active, moving the cursor near the top (edge) should reveal the topbar
+  const mouseMoveForTopbar = (ev: MouseEvent) => {
+    try {
+      if (focusMode && ev.clientY <= 80) {
+        // exit visual focus mode when user hovers near where the navbar lives
+        focusMode = false;
+      }
+    } catch (err) {}
+  };
+  window.addEventListener('mousemove', mouseMoveForTopbar);
+
+  // Keep focusMode synced with native fullscreen state
+  const onFsChange = () => {
+    try {
+      if (!document.fullscreenElement && focusMode) {
+        // left fullscreen via browser -> end focus mode visuals
+        focusMode = false;
+      }
+    } catch (err) {}
+  };
+  window.addEventListener('fullscreenchange', onFsChange);
+
+  onDestroy(() => {
+    window.removeEventListener('mousemove', mouseMoveForTopbar);
+    window.removeEventListener('fullscreenchange', onFsChange);
   });
 });
 </script>
@@ -337,7 +412,7 @@ onMount(() => {
 .title-input::placeholder { color: var(--muted-color); }
 </style>
 
-<div class="app">
+<div class="app" class:focus-mode={focusMode}>
   <div class="topbar {showBar ? 'show' : ''}" role="toolbar" tabindex="0" on:mouseenter={() => showBar = true} on:mouseleave={() => showBar = false}>
     <div style="display:flex;align-items:center;gap:12px">
       <div class="tabs">
@@ -359,6 +434,11 @@ onMount(() => {
         <!-- gear -->
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 15.5A3.5 3.5 0 1112 8.5a3.5 3.5 0 010 7zM19.4 13a7.6 7.6 0 000-2l2.1-1.6-2-3.4-2.5.7a7.7 7.7 0 00-1.7-1L14 2h-4l-.3 3.6a7.7 7.7 0 00-1.7 1L5.5 6.9l-2 3.4L5.7 12a7.6 7.6 0 000 2l-2.1 1.6 2 3.4 2.5-.7c.5.4 1 .7 1.7 1L10 22h4l.3-3.6c.6-.3 1.2-.7 1.7-1l2.5.7 2-3.4L19.4 13z" stroke="currentColor" stroke-width="0" fill="currentColor"/></svg>
       </button>
+      <!-- focus mode toggle -->
+  <button class="icon-btn" on:click={() => toggleFocusMode()} aria-label="Toggle focus mode" title="Toggle focus mode (F11)">
+        <!-- simple focus icon -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 7v-2a2 2 0 0 1 2-2h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 17v2a2 2 0 0 1-2 2h-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 21H5a2 2 0 0 1-2-2v-2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 3h2a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
       <button class="icon-btn" on:click={toggleTheme} aria-label="Toggle theme">
         {#if theme === 'light'}
           <!-- sun -->
@@ -368,13 +448,13 @@ onMount(() => {
           <svg viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#E6EEF8"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.048"></g><g id="SVGRepo_iconCarrier"> <path d="M12 22C17.5228 22 22 17.5228 22 12C22 11.5373 21.3065 11.4608 21.0672 11.8568C19.9289 13.7406 17.8615 15 15.5 15C11.9101 15 9 12.0899 9 8.5C9 6.13845 10.2594 4.07105 12.1432 2.93276C12.5392 2.69347 12.4627 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#E6EEF8"></path> </g></svg>  
         {/if}
       </button>
-      <div style="opacity:0.7;font-size:12px;padding-left:12px">IA Editor (dev)</div>
+      <div style="opacity:0.7;font-size:12px;padding-left:12px">Made by Redstonekey</div>
     </div>
   </div>
 
   <div class="main">
     <div class="center">
-      <div class="editor-wrap">
+  <div class="editor-wrap" role="region" aria-label="Editor area" on:mouseenter={onEditorMouseEnter} on:mouseleave={onEditorMouseLeave}>
         {#if activeId === null}
           <!-- Home screen: card grid -->
           <div style="padding:28px;">
@@ -456,11 +536,10 @@ onMount(() => {
       </div>
     {/key}
   {/if}
-
   {#if showUndo}
-    <div class="undo-toast">
+    <div class="undo-toast" style="border: 2px solid #e53935;">
       <div>File deleted</div>
-      <button on:click={undoDelete}>Undo</button>
+      <button style="background: #e53935; color: white; border: none;" on:click={undoDelete}>Undo</button>
     </div>
   {/if}
 </div>

@@ -44,7 +44,7 @@
 
 body { background: var(--bg-color); color: var(--text-color); }
 
-.topbar { background: var(--topbar-bg); color: var(--topbar-ink); }
+.topbar { background: var(--topbar-bg); color: var(--topbar-ink); transition: transform 220ms cubic-bezier(.2,.9,.2,1), opacity 180ms ease; }
 
 .icon-btn { background: transparent; border: none; padding:8px; border-radius:6px; color:var(--topbar-ink); }
 .icon-btn:hover { background: var(--icon-hover-bg); }
@@ -122,3 +122,31 @@ input, textarea, select, button { min-width: 0; }
   Uses theme-aware variables so dark mode selection remains subtle and readable. */
 ::selection { background: var(--selection-bg); color: var(--selection-text); }
 .cm-selectionBackground, .cm-focused .cm-selectionBackground { background: var(--selection-bg) !important; color: var(--selection-text) !important; }
+
+/* Focus mode: dim everything except the editor surface to reduce distractions.
+  Add/remove the `focus-mode` class on the root .app element to toggle. */
+.app.focus-mode > *:not(.main) { filter: brightness(0.55); user-select: none; }
+.app.focus-mode .topbar { opacity: 0.9; pointer-events: auto; transform: translateY(-120%); }
+.app.focus-mode .main { position: relative; z-index: 80; }
+.app.focus-mode .editor-wrap { border-radius: 12px; box-shadow: none; }
+.app.focus-mode:fullscreen .editor-wrap { box-shadow: none; }
+
+/* Remove any editor background shadow in all modes */
+.editor-wrap,
+.cm-editor,
+.cm-scroller {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* small transition for smoothness */
+.app, .topbar, .main, .editor-wrap { transition: filter 180ms ease, opacity 180ms ease, box-shadow 180ms ease; }
+
+textarea:focus,
+input:focus {
+  outline: none !important;
+}
+
+.cm-editor.cm-focused {
+  outline: none !important;
+}

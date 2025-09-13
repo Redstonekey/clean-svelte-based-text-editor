@@ -1,4 +1,4 @@
-# Ideen für den IA Editor (Free)
+# Ideen für den Editor (Free)
 
 - Fokus: ultrasaubere, ablenkungsfreie Oberfläche
   - Text mittig, breite Ränder (Lesekomfort)

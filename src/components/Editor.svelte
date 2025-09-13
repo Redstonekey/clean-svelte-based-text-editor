@@ -133,7 +133,6 @@ function handleKeydown(e: KeyboardEvent) {
 .container {
   background: var(--editor-bg, #fff);
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(15,15,15,0.06);
 }
 
 /* remove any dotted/focus outline around the editor container */
@@ -144,7 +143,6 @@ function handleKeydown(e: KeyboardEvent) {
 
 .container:focus-within {
   outline: none !important;
-  box-shadow: 0 8px 24px rgba(15,15,15,0.06);
 }
 
 /* aggressively clear any UA/browser focus rings or borders inside the editor */
