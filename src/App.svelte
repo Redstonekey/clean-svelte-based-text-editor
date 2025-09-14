@@ -158,6 +158,23 @@ function defaultContentForName(name: string) {
   return `# ${title}\n\nStart typing...`;
 }
 
+function extractHeaderTitle(content: string) {
+  if (!content) return '';
+  // Find the first non-empty line that starts with one or more # followed by space
+  const lines = content.split(/\r?\n/);
+  for (const line of lines) {
+    const m = line.match(/^\s*(#{1,6})\s+(.*)$/);
+    if (m) {
+      return m[2].trim();
+    }
+    // also allow plain text first-line title (no #) if it's a single-line and followed by blank or underline? Keep simple: require #
+    if (line.trim() === '') continue;
+    // if first non-empty line is not a header, stop searching
+    break;
+  }
+  return '';
+}
+
 function exportFile(id: string) {
   const f = files.find(x => x.id === id);
   if (!f) return;
